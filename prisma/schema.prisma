@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  username String @unique
+  email String
+  password String
+  avatar String
+
+  role Roles
+
+  cart Cart? 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Roles {
+  user
+  admin
+}
+
+model Product{
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  price Int
+  image String
+  discount Int?
+
+  category Category @relation(references: [id], fields: [categoryId])
+  categoryId Int
+
+  cartItems CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String @unique
+
+  products Product[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem{
+  id Int @id @default(autoincrement())
+  quantity Int @default(1)
+  
+  product Product @relation(references: [id], fields: [productId])
+  productId Int
+
+  
+
+  cart Cart @relation(references: [id], fields: [cartId], onDelete: Cascade)
+  cartId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart{
+  id Int @id @default(autoincrement())
+
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+  userId Int @unique
+
+  cartItems CartItem[]
+}
